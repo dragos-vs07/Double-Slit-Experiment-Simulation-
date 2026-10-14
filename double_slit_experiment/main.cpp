@@ -1,8 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-ofstream fout("output.txt");
-
 // all over the code when we use cell coordinates in formulas we pass it as x = j and y = i because the x axis is the columns and y axis the lines
 
 double e = 2.718281828459045; // euler's constant
@@ -174,16 +172,21 @@ void evolve(int n)
 }
 void dump_probability_results(int n)
 {
-    // dumps in a text file the final probability matrix
+    // dumps in more text files "snapshots" of the probability matrix
     // results should be taken to python to plot
-    for(int i=1;i<=200;i++)
+
+    for(int s=0;s<=n;s+=10) // incrementation should be modified if n is also highly modified 
     {
-        for(int j=1;j<=120;j++)
+        ofstream fout( "snapshots/output_" + to_string(s) + ".txt" );
+        for(int i=1;i<=200;i++)
         {
-            double abs_psi = M[i][j][n].absolute_value();
-            fout << abs_psi * abs_psi <<" ";
+            for(int j=1;j<=120;j++)
+            {
+                double abs_psi = M[i][j][s].absolute_value();
+                fout << abs_psi * abs_psi <<" ";
+            }
+            fout << '\n';
         }
-        fout << '\n';
     }
 }
 
