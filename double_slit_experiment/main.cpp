@@ -13,16 +13,11 @@ double x_zero = 6.0,y_zero = 20.0;  // origin of the packet ( position of electr
 double sigma_x = 2, sigma_y = 4; // dimensions of the packet
 double A; // normalisation constant
 
-double V[205][125]; // V[i][j] = potential energy at cell (i,j)
-
 class complex_number{   // defining complex numbers
-
-    private:
-
-    double a,b;
 
     public:
 
+    double a,b;
     // constructors
 
     complex_number(double x, double y)
@@ -92,9 +87,10 @@ class complex_number{   // defining complex numbers
     }
 };
 
-complex_number M[205][125][105];  // M[i][j][n] = wave function at cell (i,j) and time stamp n
+complex_number M[205][125][110];  // M[i][j][n] = wave function at cell (i,j) and time stamp n
 complex_number cur[205][125], tmp[205][125], K1[205][125], K2[205][125], K3[205][125], K4[205][125]; 
 complex_number complex_i = complex_number(0,1); // just a constant
+complex_number V[205][125]; // V[i][j] = CAP
 
 complex_number gaussian_wave_packet_formula(double x,double y)
 {
@@ -115,14 +111,57 @@ void first_timestamp()
         for(int j=1;j<=120;j++)
         M[i][j][0] = gaussian_wave_packet_formula(j,i);
 }
+double n = 2, eta = 6, d = 10;
+double fx(double x)
+{
+    double xb = 10, xr = 110;
+    if(x < xb)
+        return pow((xb-x)/d,n);
+    else if(x > xr)
+        return pow((x-xr)/d,n);
+    else
+        return 0;
+
+}
+double fy(double y)
+{
+    double yb = 10, yr = 190;
+    if(y < yb)
+        return pow((yb-y)/d,n);
+    else if(y > yr)
+        return pow((y-yr)/d,n);
+    else
+        return 0;
+}
 void initialise_V()
 {
     int slit_w = 5, c1 = 80, c2 = 120;
-    for (int i = 1; i <= 200; i++) {
+    for (int i = 2; i <= 199; i++) {
         bool slit = abs(i - c1) <= slit_w/2 || abs(i - c2) <= slit_w/2;
         if (!slit)
-            for (int j = 70; j < 74; j++) V[i][j] = 20.0;
+            for (int j = 70; j < 74; j++) V[i][j] = complex_number(20.0,0);
     }
+
+    // x boundary ( left right )
+    for(int i=1;i<=200;i++)
+    {
+        for(int j=1;j<=9;j++)
+        V[i][j] = complex_number( V[i][j].a, -eta*( fx(j) + fy(i) ) );
+
+        for(int j=111;j<=120;j++)
+        V[i][j] = complex_number( V[i][j].a, -eta*( fx(j) + fy(i) ) );
+    }
+
+    // y boundary ( top bottom )
+    for(int j=1;j<=120;j++)
+    {
+        for(int i=1;i<=9;i++)
+        V[i][j] = complex_number( V[i][j].a, -eta*( fx(j) + fy(i) ) );
+
+        for(int i=191;i<=200;i++)
+        V[i][j] = complex_number( V[i][j].a, -eta*( fx(j) + fy(i) ) );
+    }
+        
 }
 void calculate_A()
 {
@@ -223,7 +262,7 @@ void dump_probability_results(int n)
 
 int main()
 {
-    int n = 1000;
+    int n = 1050;
     first_timestamp();
     initialise_V(); // potential energy doesn't take part in defining the starting phase of the packet
     calculate_A();
