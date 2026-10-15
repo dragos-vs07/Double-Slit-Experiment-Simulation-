@@ -93,7 +93,7 @@ class complex_number{   // defining complex numbers
 };
 
 complex_number M[205][125][105];  // M[i][j][n] = wave function at cell (i,j) and time stamp n
-complex_number L[205][125]; // L[i][j] = Laplacian at cell (i,j)
+complex_number cur[205][125], tmp[205][125], K1[205][125], K2[205][125], K3[205][125], K4[205][125]; 
 complex_number complex_i = complex_number(0,1); // just a constant
 
 complex_number gaussian_wave_packet_formula(double x,double y)
@@ -143,31 +143,62 @@ void normalise()
         for(int j=1;j<=120;j++)
             M[i][j][0] = M[i][j][0] * A;
 }
-void calculate_laplacian(int n)
+void deriv(complex_number inM[205][125], complex_number outM[205][125])
 {
+    complex_number term1 = (complex_i * h) / (2 * e_mass);
+    complex_number term2 = complex_i / h;
+
     for(int i=1;i<=200;i++)
         for(int j=1;j<=120;j++)
         {
-            complex_number lap_x = ( M[i][j-1][n] + M[i][j+1][n] - 2 * M[i][j][n] ) / ( delta_x * delta_x );
-            complex_number lap_y = ( M[i-1][j][n] + M[i+1][j][n] - 2 * M[i][j][n] ) / ( delta_y * delta_y ) ;
+            complex_number lap_x = ( inM[i][j-1] + inM[i][j+1] - 2 * inM[i][j] ) / ( delta_x * delta_x );
+            complex_number lap_y = ( inM[i-1][j] + inM[i+1][j] - 2 * inM[i][j] ) / ( delta_y * delta_y ) ;
 
-            L[i][j] = lap_x + lap_y;
+            outM[i][j] = term1 * (lap_x + lap_y) - term2 * V[i][j] * inM[i][j];
         }
 }
 void evolve(int n)
 {
+    for(int i=1;i<=200;i++)
+        for(int j=1;j<=120;j++)
+            cur[i][j] = M[i][j][0];
 
     for(int ts=1;ts<=n;ts++)
     {
-        calculate_laplacian(ts-1);
+        deriv(cur, K1);
+
         for(int i=1;i<=200;i++)
             for(int j=1;j<=120;j++)
-            {
-                complex_number term1 = ( complex_i * h ) / ( 2 * e_mass ); // complex number
-                complex_number term2 = complex_i / h; // complex number
+                tmp[i][j] = cur[i][j] + (delta_t/2) * K1[i][j];
+        deriv(tmp, K2);
 
-                M[i][j][ts] = M[i][j][ts-1] + delta_t * ( term1 * L[i][j] - term2 * V[i][j] * M[i][j][ts-1] );
-            }
+        for(int i=1;i<=200;i++)
+            for(int j=1;j<=120;j++)
+                tmp[i][j] = cur[i][j] + (delta_t/2) * K2[i][j];
+        deriv(tmp, K3);
+
+        for(int i=1;i<=200;i++)
+            for(int j=1;j<=120;j++)
+                tmp[i][j] = cur[i][j] + delta_t * K3[i][j];
+        deriv(tmp, K4);
+
+        for(int i=1;i<=200;i++)
+            for(int j=1;j<=120;j++)
+                cur[i][j] = cur[i][j]
+                    + (delta_t/6) * (K1[i][j] + 2*K2[i][j] + 2*K3[i][j] + K4[i][j]);
+
+        if(ts % 10 == 0)
+        {
+            double S = 0;
+            for(int i=1;i<=200;i++)
+                for(int j=1;j<=120;j++)
+                {
+                    M[i][j][ts/10] = cur[i][j];
+                    double a = cur[i][j].absolute_value();
+                    S += a * a;
+                }
+            cout << ts << " " << S << "\n";   // should stay ~1
+        }
     }
 }
 void dump_probability_results(int n)
@@ -182,7 +213,7 @@ void dump_probability_results(int n)
         {
             for(int j=1;j<=120;j++)
             {
-                double abs_psi = M[i][j][s].absolute_value();
+                double abs_psi = M[i][j][s/10].absolute_value();
                 fout << abs_psi * abs_psi <<" ";
             }
             fout << '\n';
@@ -192,7 +223,7 @@ void dump_probability_results(int n)
 
 int main()
 {
-    int n = 100;
+    int n = 800;
     first_timestamp();
     initialise_V(); // potential energy doesn't take part in defining the starting phase of the packet
     calculate_A();
