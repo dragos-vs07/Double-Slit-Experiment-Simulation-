@@ -197,7 +197,7 @@ void evolve(int n)
                     double a = cur[i][j].absolute_value();
                     S += a * a;
                 }
-            cout << ts << " " << S << "\n";   // should stay ~1
+            //cout << ts << " " << S << "\n";   // should stay ~1
         }
     }
 }
@@ -208,7 +208,7 @@ void dump_probability_results(int n)
 
     for(int s=0;s<=n;s+=10) // incrementation should be modified if n is also highly modified 
     {
-        ofstream fout( "snapshots/output_" + to_string(s) + ".txt" );
+        ofstream fout( "C:/Users/Dragos/Desktop/Double Slit Experiment Simulation/double_slit_experiment/snapshots/output_" + to_string(s) + ".txt" );
         for(int i=1;i<=200;i++)
         {
             for(int j=1;j<=120;j++)
@@ -223,7 +223,7 @@ void dump_probability_results(int n)
 
 int main()
 {
-    int n = 800;
+    int n = 1000;
     first_timestamp();
     initialise_V(); // potential energy doesn't take part in defining the starting phase of the packet
     calculate_A();
