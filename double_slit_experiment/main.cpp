@@ -87,10 +87,12 @@ class complex_number{   // defining complex numbers
     }
 };
 
-complex_number M[205][125][110];  // M[i][j][n] = wave function at cell (i,j) and time stamp n
-complex_number cur[205][125], tmp[205][125], K1[205][125], K2[205][125], K3[205][125], K4[205][125]; 
+const int NMAX = 205, YMAX = 175;
+
+complex_number M[NMAX][YMAX][130];  // M[i][j][n] = wave function at cell (i,j) in the n-th snapshot
+complex_number psi[NMAX][YMAX], tmp[NMAX][YMAX], K1[NMAX][YMAX], K2[NMAX][YMAX], K3[NMAX][YMAX], K4[NMAX][YMAX]; 
 complex_number complex_i = complex_number(0,1); // just a constant
-complex_number V[205][125]; // V[i][j] = CAP
+complex_number V[NMAX][YMAX]; // V[i][j] = potential energy ( cap near borders )
 
 complex_number gaussian_wave_packet_formula(double x,double y)
 {
@@ -108,17 +110,17 @@ complex_number gaussian_wave_packet_formula(double x,double y)
 void first_timestamp()
 {
     for(int i=1;i<=200;i++)
-        for(int j=1;j<=120;j++)
+        for(int j=1;j<=170;j++)
         M[i][j][0] = gaussian_wave_packet_formula(j,i);
 }
 double n = 2, eta = 6, d = 10;
 double fx(double x)
 {
-    double xb = 10, xr = 110;
+    double xb = 10, xr = 140;
     if(x < xb)
         return pow((xb-x)/d,n);
     else if(x > xr)
-        return pow((x-xr)/d,n);
+        return pow((x-xr)/30,n);
     else
         return 0;
 
@@ -148,12 +150,12 @@ void initialise_V()
         for(int j=1;j<=9;j++)
         V[i][j] = complex_number( V[i][j].a, -eta*( fx(j) + fy(i) ) );
 
-        for(int j=111;j<=120;j++)
+        for(int j=141;j<=170;j++)
         V[i][j] = complex_number( V[i][j].a, -eta*( fx(j) + fy(i) ) );
     }
 
     // y boundary ( top bottom )
-    for(int j=1;j<=120;j++)
+    for(int j=1;j<=170;j++)
     {
         for(int i=1;i<=9;i++)
         V[i][j] = complex_number( V[i][j].a, -eta*( fx(j) + fy(i) ) );
@@ -163,12 +165,12 @@ void initialise_V()
     }
         
 }
-void calculate_A()
+void calculate_A() 
 {
     double S = 0.0;
 
     for(int i=1;i<=200;i++)
-        for(int j=1;j<=120;j++)
+        for(int j=1;j<=170;j++)
         {
             double abs_psi = M[i][j][0].absolute_value();
             S += abs_psi * abs_psi;
@@ -179,62 +181,87 @@ void calculate_A()
 void normalise()
 {
     for(int i=1;i<=200;i++)
-        for(int j=1;j<=120;j++)
+        for(int j=1;j<=170;j++)
             M[i][j][0] = M[i][j][0] * A;
 }
-void deriv(complex_number inM[205][125], complex_number outM[205][125])
+void deriv(complex_number psi[NMAX][YMAX], complex_number psi_deriv[NMAX][YMAX])
 {
+    // calculate derivative of time of psi by Schrodinger formula for a known psi ( all cells )
+
     complex_number term1 = (complex_i * h) / (2 * e_mass);
     complex_number term2 = complex_i / h;
 
     for(int i=1;i<=200;i++)
-        for(int j=1;j<=120;j++)
+        for(int j=1;j<=170;j++)
         {
-            complex_number lap_x = ( inM[i][j-1] + inM[i][j+1] - 2 * inM[i][j] ) / ( delta_x * delta_x );
-            complex_number lap_y = ( inM[i-1][j] + inM[i+1][j] - 2 * inM[i][j] ) / ( delta_y * delta_y ) ;
+            complex_number lap_x = ( psi[i][j-1] + psi[i][j+1] - 2 * psi[i][j] ) / ( delta_x * delta_x );
+            complex_number lap_y = ( psi[i-1][j] + psi[i+1][j] - 2 * psi[i][j] ) / ( delta_y * delta_y ) ;
+            // lap_x + lap_y = Laplacian
 
-            outM[i][j] = term1 * (lap_x + lap_y) - term2 * V[i][j] * inM[i][j];
+            psi_deriv[i][j] = term1 * (lap_x + lap_y) - term2 * V[i][j] * psi[i][j];
         }
 }
 void evolve(int n)
 {
+    // psi at ts = 0 holds the wave function for every cell calculated with the gaussian package
+    // which is also always the first snapshot
+
     for(int i=1;i<=200;i++)
-        for(int j=1;j<=120;j++)
-            cur[i][j] = M[i][j][0];
+        for(int j=1;j<=170;j++)
+            psi[i][j] = M[i][j][0];
 
     for(int ts=1;ts<=n;ts++)
     {
-        deriv(cur, K1);
+        // at each time step we first find psi(t) differentiated with respect to t for every cell
+
+        deriv(psi, K1); // K1, simple Euler, finds slope of psi at time point ts for every cell
+        
+        // now in temp we hold all the points from psi moved by delta_t / 2 time units forward
 
         for(int i=1;i<=200;i++)
-            for(int j=1;j<=120;j++)
-                tmp[i][j] = cur[i][j] + (delta_t/2) * K1[i][j];
-        deriv(tmp, K2);
+            for(int j=1;j<=170;j++)
+                tmp[i][j] = psi[i][j] + (delta_t/2) * K1[i][j]; // slope at ( ts + delta_t ) / 2
+                                                                // by direction of calculated slope K1
+
+        // so we calculate the slope of psi at time point delta_t / 2 along the direction K1 slopes indicate
+        deriv(tmp, K2); // K2, finds the slope of all new calculated points after the delta_t / 2 time movement
+
+        // repeat the same process but instead of moving on the direction of K1 ( so slope at delta_t + ts)
+        // we move along the direction of K2 ( slope at delta_t/2 + ts)
 
         for(int i=1;i<=200;i++)
-            for(int j=1;j<=120;j++)
-                tmp[i][j] = cur[i][j] + (delta_t/2) * K2[i][j];
-        deriv(tmp, K3);
+            for(int j=1;j<=170;j++)
+                tmp[i][j] = psi[i][j] + (delta_t/2) * K2[i][j]; // slope at ts + delta_t / 2
+                                                                // by direction of calculated slope K2
+
+        deriv(tmp, K3); // more accurate slope for all points of psi at time moment ts + delta_t/2
+
+        // now temp holds all the points of psi at the next time step ( so ts + delta_t )
 
         for(int i=1;i<=200;i++)
-            for(int j=1;j<=120;j++)
-                tmp[i][j] = cur[i][j] + delta_t * K3[i][j];
-        deriv(tmp, K4);
+            for(int j=1;j<=170;j++)
+                tmp[i][j] = psi[i][j] + delta_t * K3[i][j]; // slope at ts + delta_t
+
+
+        deriv(tmp, K4); // and so we calculate the slope of all the cells of psi at the next time step ( ts + delta_t) 
 
         for(int i=1;i<=200;i++)
-            for(int j=1;j<=120;j++)
-                cur[i][j] = cur[i][j]
-                    + (delta_t/6) * (K1[i][j] + 2*K2[i][j] + 2*K3[i][j] + K4[i][j]);
+            for(int j=1;j<=170;j++)
+                psi[i][j] = psi[i][j] + delta_t * ( K1[i][j] + 2*K2[i][j] + 2*K3[i][j] + K4[i][j] ) / 6; 
 
-        if(ts % 10 == 0)
+            // in the end, RK4 approximation for psi differentiated with respect to t is the avrage of all 4 slopes calculated:
+            // the one at time moment ts , two at time moment ts + delta_t/2 ( most important so multiplied by 2 ) and one at the next time step ts + delta_t
+            // thus psi at the next timestep is line 248
+
+        if(ts % 10 == 0) // save snapshot at every 10 time steps
         {
             double S = 0;
             for(int i=1;i<=200;i++)
-                for(int j=1;j<=120;j++)
+                for(int j=1;j<=170;j++)
                 {
-                    M[i][j][ts/10] = cur[i][j];
-                    double a = cur[i][j].absolute_value();
-                    S += a * a;
+                    M[i][j][ts/10] = psi[i][j]; // store snapshot
+                    double a = psi[i][j].absolute_value();
+                    S += a * a; // sum to check probability correctness
                 }
             //cout << ts << " " << S << "\n";   // should stay ~1
         }
@@ -250,7 +277,7 @@ void dump_probability_results(int n)
         ofstream fout( "C:/Users/Dragos/Desktop/Double Slit Experiment Simulation/double_slit_experiment/snapshots/output_" + to_string(s) + ".txt" );
         for(int i=1;i<=200;i++)
         {
-            for(int j=1;j<=120;j++)
+            for(int j=1;j<=170;j++)
             {
                 double abs_psi = M[i][j][s/10].absolute_value();
                 fout << abs_psi * abs_psi <<" ";
@@ -262,7 +289,7 @@ void dump_probability_results(int n)
 
 int main()
 {
-    int n = 1050;
+    int n = 1200; // time steps
     first_timestamp();
     initialise_V(); // potential energy doesn't take part in defining the starting phase of the packet
     calculate_A();
