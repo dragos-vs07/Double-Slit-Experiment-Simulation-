@@ -6,15 +6,15 @@ import subprocess
 
 root_path = "C:/Users/Dragos/Desktop/Double Slit Experiment Simulation/double_slit_experiment"
 # uncomment to regenerate frames
-#subprocess.run(["g++", root_path + "/main.cpp", "-o", root_path + "/main.exe"], check=True)
-#subprocess.run([root_path + "/main.exe"], check=True)
+subprocess.run(["g++", root_path + "/main.cpp", "-o", root_path + "/main.exe"], check=True)
+subprocess.run([root_path + "/main.exe"], check=True)
 
 #files = [root_path + f"/snapshots/output_{n}.txt" for n in range(0, 1201, 10)] # animation
 files = [root_path + f"/snapshots/output_{1200}.txt"] #only last frame
 fig, ax = plt.subplots()
 
 data0 = np.loadtxt(files[0])
-vmax = 0.05 * max(np.loadtxt(f).max() for f in files)   # try 0.02 to 0.2
+vmax = 0.05 * max(np.loadtxt(f).max() for f in files)   
 
 im = ax.imshow(data0, origin="lower", extent=[0, 24, 0, 40],
                cmap="magma",

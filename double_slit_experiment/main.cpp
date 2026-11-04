@@ -88,10 +88,10 @@ class complex_number{   // defining complex numbers
 };
 
 const int NMAX = 205, YMAX = 175;
+complex_number complex_i = complex_number(0,1); // just a constant
 
 complex_number M[NMAX][YMAX][130];  // M[i][j][n] = wave function at cell (i,j) in the n-th snapshot
 complex_number psi[NMAX][YMAX], tmp[NMAX][YMAX], K1[NMAX][YMAX], K2[NMAX][YMAX], K3[NMAX][YMAX], K4[NMAX][YMAX]; 
-complex_number complex_i = complex_number(0,1); // just a constant
 complex_number V[NMAX][YMAX]; // V[i][j] = potential energy ( cap near borders )
 
 complex_number gaussian_wave_packet_formula(double x,double y)
@@ -113,7 +113,9 @@ void first_timestamp()
         for(int j=1;j<=170;j++)
         M[i][j][0] = gaussian_wave_packet_formula(j,i);
 }
+
 double n = 2, eta = 6, d = 10;
+
 double fx(double x)
 {
     double xb = 10, xr = 140;
@@ -220,7 +222,7 @@ void evolve(int n)
 
         for(int i=1;i<=200;i++)
             for(int j=1;j<=170;j++)
-                tmp[i][j] = psi[i][j] + (delta_t/2) * K1[i][j]; // slope at ( ts + delta_t ) / 2
+                tmp[i][j] = psi[i][j] + (delta_t/2) * K1[i][j]; //calculate psi at ts + delta / 2 using using slope at ts
                                                                 // by direction of calculated slope K1
 
         // so we calculate the slope of psi at time point delta_t / 2 along the direction K1 slopes indicate
@@ -231,7 +233,7 @@ void evolve(int n)
 
         for(int i=1;i<=200;i++)
             for(int j=1;j<=170;j++)
-                tmp[i][j] = psi[i][j] + (delta_t/2) * K2[i][j]; // slope at ts + delta_t / 2
+                tmp[i][j] = psi[i][j] + (delta_t/2) * K2[i][j]; // calculate psi at ts + delta / 2 using slope at ts + delta_t / 2
                                                                 // by direction of calculated slope K2
 
         deriv(tmp, K3); // more accurate slope for all points of psi at time moment ts + delta_t/2
@@ -240,7 +242,7 @@ void evolve(int n)
 
         for(int i=1;i<=200;i++)
             for(int j=1;j<=170;j++)
-                tmp[i][j] = psi[i][j] + delta_t * K3[i][j]; // slope at ts + delta_t
+                tmp[i][j] = psi[i][j] + delta_t * K3[i][j]; // calculate psi at t(s+1) using slope at ts + delta_t / 2
 
 
         deriv(tmp, K4); // and so we calculate the slope of all the cells of psi at the next time step ( ts + delta_t) 
