@@ -23,6 +23,8 @@ class Simulation
 public:
     Simulation();
     void reset(const Params &p);   // build starting state from p
+    void normalise();
+    void initialise_V();
     void step(int n);              // advance n RK4 steps
     const std::vector<double>& density() const { return density_; }
     int nx() const { return MMAX - 5; }   // 170 columns (x)
