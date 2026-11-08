@@ -1,6 +1,8 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
+#pragma once
+
 #include <vector>
 #include "complex_numbers.h"
 
@@ -26,9 +28,20 @@ public:
     void normalise();
     void initialise_V();
     void step(int n);              // advance n RK4 steps
-    const std::vector<double>& density() const { return density_; }
-    int nx() const { return MMAX - 5; }   // 170 columns (x)
-    int ny() const { return NMAX - 5; }   // 200 rows (y)
+
+    const std::vector<double>& density() const
+    {
+        return density_;
+    }
+
+    int nx() const
+    {
+        return MMAX - 5; // 170 columns (x)
+    }
+    int ny() const
+    {
+        return NMAX - 5; // 200 rows (y)
+    }
 
 private:
     static constexpr int NMAX = 205, MMAX = 175;

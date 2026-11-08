@@ -1,11 +1,13 @@
 #ifndef WAVEVIEW_H
 #define WAVEVIEW_H
 
+#pragma once
+
 #include <QWidget>
 #include <QImage>
 #include <QPainter>
-#include "simulation.h"
 #include <algorithm>
+#include "simulation.h"
 
 class WaveView : public QWidget
 {
@@ -32,7 +34,7 @@ public:
                 double v = d[i * w + j];
                 double t = std::sqrt(v / maxd);      // 0..1; sqrt brightens the faint parts
                 int g = int(255 * t);
-                img_.setPixel(j, h - 1 - i, qRgb(g, g, g));
+                img_.setPixel(j, h - 1 - i, qRgb(0, g/2, g));
             }
 
         update();

@@ -1,6 +1,8 @@
 #ifndef COMPLEX_NUMBERS_H
 #define COMPLEX_NUMBERS_H
 
+#pragma once
+
 #include <cmath>
 
 class complex_number

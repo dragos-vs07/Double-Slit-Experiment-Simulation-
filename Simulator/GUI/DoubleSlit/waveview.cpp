@@ -1,3 +1,4 @@
+#pragma once
 #include "waveview.h"
 
 WaveView::WaveView(QWidget *parent) : QWidget(parent)

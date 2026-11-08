@@ -1,3 +1,4 @@
+#pragma once
 #include "mainwindow.h"
 #include "simulation.h"
 #include <QDebug>
@@ -8,6 +9,9 @@ void MainWindow::tick()
 {
     sim_.step(3);
     view_->showFrame(sim_);
+
+    if(++frame_ >= MaxFrames_)
+        resetSim();
 }
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -35,6 +39,13 @@ MainWindow::MainWindow(QWidget *parent)
     });
 }
 
-MainWindow::~MainWindow()
+void MainWindow::resetSim()
 {
+    frame_ = 0;
+    sim_.reset(Params());
+    view_ -> showFrame(sim_);
+
 }
+
+MainWindow::~MainWindow()
+{}

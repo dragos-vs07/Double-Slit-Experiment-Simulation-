@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#pragma once
+
 #include <QMainWindow>
 #include <QTimer>
 #include <QPushButton>
@@ -14,6 +16,9 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    int frame_ = 0;
+    int MaxFrames_ = 480;
+    void resetSim();
 
 private:
     Simulation sim_;
