@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run DoubleSlit",
+      "type": "process",
+      "command": "${workspaceFolder}/build/vscode/DoubleSlit.exe",
+      "options": {
+        "env": {
+          "PATH": "C:/Qt/6.9.0/mingw_64/bin;C:/Qt/Tools/mingw1310_64/bin;${env:PATH}"
+        }
+      },
+      "problemMatcher": []
+    }
+  ]
+}
