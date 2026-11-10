@@ -62,7 +62,8 @@ MainWindow::MainWindow(QWidget *parent)
          */
         QDoubleSpinBox   *kx_input_box = new QDoubleSpinBox(), *ky_input_box = new QDoubleSpinBox(),
                     *delta_x_input_box = new QDoubleSpinBox(), *delta_y_input_box = new QDoubleSpinBox(),
-                    *sigma_x_input_box = new QDoubleSpinBox(), *sigma_y_input_box = new QDoubleSpinBox();
+                    *sigma_x_input_box = new QDoubleSpinBox(), *sigma_y_input_box = new QDoubleSpinBox(),
+                    *x_zero_input_box = new QDoubleSpinBox(), *y_zero_input_box = new QDoubleSpinBox();
 
         Params p_default;
 
@@ -72,14 +73,18 @@ MainWindow::MainWindow(QWidget *parent)
         delta_y_input_box->setValue(p_default.delta_y);
         sigma_x_input_box->setValue(p_default.sigma_x);
         sigma_y_input_box->setValue(p_default.sigma_y);
+        x_zero_input_box -> setValue(p_default.x_zero);
+        y_zero_input_box -> setValue(p_default.y_zero);
 
         auto    *kx_label = new QLabel("kx"), *ky_label = new QLabel("ky"),
                 *delta_x_label = new QLabel("delta x"), *delta_y_label = new QLabel("delta y"),
-                *sigma_x_label = new QLabel("sigma x"), *sigma_y_label = new QLabel("sigma y");
+                *sigma_x_label = new QLabel("sigma x"), *sigma_y_label = new QLabel("sigma y"),
+                *x_zero_label = new QLabel("x zero"), *y_zero_label = new QLabel("y zero");
 
         auto    *kx_input = new QVBoxLayout(), *ky_input = new QVBoxLayout(),
                 *delta_x_input = new QVBoxLayout(), *delta_y_input = new QVBoxLayout(),
-                *sigma_x_input = new QVBoxLayout(), *sigma_y_input = new QVBoxLayout();
+                *sigma_x_input = new QVBoxLayout(), *sigma_y_input = new QVBoxLayout(),
+                *x_zero_input = new QVBoxLayout(), *y_zero_input = new QVBoxLayout();
 
         kx_input -> addWidget(kx_label);
         kx_input -> addWidget(kx_input_box);
@@ -99,9 +104,16 @@ MainWindow::MainWindow(QWidget *parent)
         delta_y_input -> addWidget(delta_y_label);
         delta_y_input -> addWidget(delta_y_input_box);
 
+        x_zero_input -> addWidget(x_zero_label);
+        x_zero_input -> addWidget(x_zero_input_box);
+
+        y_zero_input -> addWidget(y_zero_label);
+        y_zero_input -> addWidget(y_zero_input_box);
+
         QHBoxLayout *k_inputs = new QHBoxLayout();
         QHBoxLayout *delta_inputs = new QHBoxLayout();
         QHBoxLayout *sigma_inputs = new QHBoxLayout();
+        QHBoxLayout *zero_inputs = new QHBoxLayout();
 
         k_inputs -> addLayout(kx_input);
         k_inputs -> addLayout(ky_input);
@@ -109,15 +121,19 @@ MainWindow::MainWindow(QWidget *parent)
         delta_inputs -> addLayout(delta_y_input);
         sigma_inputs -> addLayout(sigma_x_input);
         sigma_inputs -> addLayout(sigma_y_input);
+        zero_inputs -> addLayout(x_zero_input);
+        zero_inputs -> addLayout(y_zero_input);
 
         params_area -> addLayout(k_inputs);
         params_area -> addLayout(delta_inputs);
         params_area -> addLayout(sigma_inputs);
+        params_area -> addLayout(zero_inputs);
 
         auto set_params_btn = new QPushButton("Submit", central);
         connect(set_params_btn, &QPushButton::clicked, this, [this, kx_input_box, ky_input_box,
                                                               delta_x_input_box, delta_y_input_box,
-                                                              sigma_x_input_box, sigma_y_input_box]() {
+                                                              sigma_x_input_box, sigma_y_input_box,
+                                                              x_zero_input_box, y_zero_input_box]() {
 
             timer_->stop();
             playBtn_->setText("Play");
@@ -128,6 +144,8 @@ MainWindow::MainWindow(QWidget *parent)
             current_params_.delta_y = delta_y_input_box->value();
             current_params_.sigma_x = sigma_x_input_box->value();
             current_params_.sigma_y = sigma_y_input_box->value();
+            current_params_.x_zero = x_zero_input_box->value();
+            current_params_.y_zero = y_zero_input_box->value();
 
             resetSim();
         });
