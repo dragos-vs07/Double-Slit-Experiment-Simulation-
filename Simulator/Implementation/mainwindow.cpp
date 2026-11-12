@@ -29,14 +29,14 @@ MainWindow::MainWindow(QWidget *parent)
 
         playBtn_ = new QPushButton("Play", central);
 
-        animation_area->addWidget(view_, 1);      // the 1 means "this one takes the extra space"
+        animation_area->addWidget(view_, 1);
         animation_area->addWidget(playBtn_);
 
         sim_.reset(Params{});
         view_->showFrame(sim_);
 
         timer_ = new QTimer(this);
-        timer_->setInterval(16);   // ms between frames
+        timer_->setInterval(6);   // ms between frames
 
         connect(timer_, &QTimer::timeout, this, &MainWindow::tick);
 
@@ -63,7 +63,10 @@ MainWindow::MainWindow(QWidget *parent)
         QDoubleSpinBox   *kx_input_box = new QDoubleSpinBox(), *ky_input_box = new QDoubleSpinBox(),
                     *delta_x_input_box = new QDoubleSpinBox(), *delta_y_input_box = new QDoubleSpinBox(),
                     *sigma_x_input_box = new QDoubleSpinBox(), *sigma_y_input_box = new QDoubleSpinBox(),
-                    *x_zero_input_box = new QDoubleSpinBox(), *y_zero_input_box = new QDoubleSpinBox();
+                    *x_zero_input_box = new QDoubleSpinBox(), *y_zero_input_box = new QDoubleSpinBox(),
+                    *slit_w_input_box = new QDoubleSpinBox(),
+                    *slit_center_input_box = new QDoubleSpinBox(),
+                    *slit_sep_input_box = new QDoubleSpinBox();
 
         Params p_default;
 
@@ -75,16 +78,44 @@ MainWindow::MainWindow(QWidget *parent)
         sigma_y_input_box->setValue(p_default.sigma_y);
         x_zero_input_box -> setValue(p_default.x_zero);
         y_zero_input_box -> setValue(p_default.y_zero);
+        slit_w_input_box -> setValue(p_default.slit_w);
+        slit_center_input_box -> setValue(p_default.slit_center);
+        slit_sep_input_box -> setValue(p_default.slit_sep);
+
+        // int NMAX = 205, MMAX = 175;
+        x_zero_input_box -> setRange(0.0,170.0);
+        y_zero_input_box -> setRange(0.0,200.0);
+        slit_center_input_box -> setRange(0.0,200.0);
 
         auto    *kx_label = new QLabel("kx"), *ky_label = new QLabel("ky"),
                 *delta_x_label = new QLabel("delta x"), *delta_y_label = new QLabel("delta y"),
                 *sigma_x_label = new QLabel("sigma x"), *sigma_y_label = new QLabel("sigma y"),
-                *x_zero_label = new QLabel("x zero"), *y_zero_label = new QLabel("y zero");
+                *x_zero_label = new QLabel("x zero"), *y_zero_label = new QLabel("y zero"),
+                *slit_w_label = new QLabel("slit width"),
+                *slit_center_label = new QLabel("slit center position"),
+                *slit_sep_label = new QLabel("distance between slits");
+
+
+        kx_label -> setAlignment(Qt::AlignCenter);
+        ky_label -> setAlignment(Qt::AlignCenter);
+        delta_x_label -> setAlignment(Qt::AlignCenter);
+        delta_y_label -> setAlignment(Qt::AlignCenter);
+        sigma_x_label -> setAlignment(Qt::AlignCenter);
+        sigma_y_label -> setAlignment(Qt::AlignCenter);
+        x_zero_label -> setAlignment(Qt::AlignCenter);
+        y_zero_label -> setAlignment(Qt::AlignCenter);
+        slit_w_label -> setAlignment(Qt::AlignCenter);
+        slit_center_label -> setAlignment(Qt::AlignCenter);
+        slit_sep_label -> setAlignment(Qt::AlignCenter);
 
         auto    *kx_input = new QVBoxLayout(), *ky_input = new QVBoxLayout(),
                 *delta_x_input = new QVBoxLayout(), *delta_y_input = new QVBoxLayout(),
                 *sigma_x_input = new QVBoxLayout(), *sigma_y_input = new QVBoxLayout(),
-                *x_zero_input = new QVBoxLayout(), *y_zero_input = new QVBoxLayout();
+                *x_zero_input = new QVBoxLayout(), *y_zero_input = new QVBoxLayout(),
+                *slit_w_input = new QVBoxLayout(),
+                *slit_center_input = new QVBoxLayout(),
+                *slit_sep_input = new QVBoxLayout();
+
 
         kx_input -> addWidget(kx_label);
         kx_input -> addWidget(kx_input_box);
@@ -110,6 +141,15 @@ MainWindow::MainWindow(QWidget *parent)
         y_zero_input -> addWidget(y_zero_label);
         y_zero_input -> addWidget(y_zero_input_box);
 
+        slit_w_input -> addWidget(slit_w_label);
+        slit_w_input -> addWidget(slit_w_input_box);
+
+        slit_center_input -> addWidget(slit_center_label);
+        slit_center_input -> addWidget(slit_center_input_box);
+
+        slit_sep_input -> addWidget(slit_sep_label);
+        slit_sep_input -> addWidget(slit_sep_input_box);
+
         QHBoxLayout *k_inputs = new QHBoxLayout();
         QHBoxLayout *delta_inputs = new QHBoxLayout();
         QHBoxLayout *sigma_inputs = new QHBoxLayout();
@@ -124,16 +164,34 @@ MainWindow::MainWindow(QWidget *parent)
         zero_inputs -> addLayout(x_zero_input);
         zero_inputs -> addLayout(y_zero_input);
 
+        QLabel *l1 = new QLabel("Momentum");
+        l1->setAlignment(Qt::AlignCenter);
+        QLabel *l2 = new QLabel("Distance between cells");
+        l2->setAlignment(Qt::AlignCenter);
+        QLabel *l3 = new QLabel("Particle size");
+        l3->setAlignment(Qt::AlignCenter);
+        QLabel *l4 = new QLabel("Particle starting position");
+        l4->setAlignment(Qt::AlignCenter);
+
+        params_area -> addWidget(l1);
         params_area -> addLayout(k_inputs);
+        params_area -> addWidget(l2);
         params_area -> addLayout(delta_inputs);
+        params_area -> addWidget(l3);
         params_area -> addLayout(sigma_inputs);
+        params_area -> addWidget(l4);
         params_area -> addLayout(zero_inputs);
+        params_area -> addLayout(slit_w_input);
+        params_area -> addLayout(slit_center_input);
+        params_area -> addLayout(slit_sep_input);
 
         auto set_params_btn = new QPushButton("Submit", central);
         connect(set_params_btn, &QPushButton::clicked, this, [this, kx_input_box, ky_input_box,
                                                               delta_x_input_box, delta_y_input_box,
                                                               sigma_x_input_box, sigma_y_input_box,
-                                                              x_zero_input_box, y_zero_input_box]() {
+                                                              x_zero_input_box, y_zero_input_box,
+                                                              slit_w_input_box, slit_center_input_box,
+                                                              slit_sep_input_box]() {
 
             timer_->stop();
             playBtn_->setText("Play");
@@ -146,8 +204,10 @@ MainWindow::MainWindow(QWidget *parent)
             current_params_.sigma_y = sigma_y_input_box->value();
             current_params_.x_zero = x_zero_input_box->value();
             current_params_.y_zero = y_zero_input_box->value();
-
-            resetSim();
+            current_params_.slit_w = slit_w_input_box->value();
+            current_params_.slit_center = slit_center_input_box->value();
+            current_params_.slit_sep = slit_sep_input_box->value();
+                                    resetSim();
         });
 
         params_area -> addWidget(set_params_btn);

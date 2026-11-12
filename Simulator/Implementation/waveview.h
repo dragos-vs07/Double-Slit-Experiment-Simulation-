@@ -31,10 +31,11 @@ public:
         for(int i=0;i<h;i++)
             for(int j=0;j<w;j++)
             {
+                int brightness_offest = 40;
                 double v = d[i * w + j];
-                double t = std::sqrt(v / maxd);      // 0..1; sqrt brightens the faint parts
+                double t = std::min(1.0, std::sqrt(v / maxd) * 1.5);
                 int g = int(255 * t);
-                img_.setPixel(j, h - 1 - i, qRgb(0, g/2, g));
+                img_.setPixel(j, h - 1 - i, qRgb(0, g / 2, g));
             }
 
         update();
