@@ -48,18 +48,15 @@ MainWindow::MainWindow(QWidget *parent)
         auto *params_area = new QVBoxLayout();
 
         /*
-            struct Params{
             double delta_x = 0.2, delta_y = 0.2;    // real distance between cells
-            double delta_t = 0.005; // time per timestamp
             double kx = 3, ky = 0;  // gaussian packet momentum
             double x_zero = 6.0,y_zero = 20.0;  // origin of the packet ( position of electron gun )
             double sigma_x = 2, sigma_y = 4; // dimensions of the packet
-
             int slit_w = 5;        // slit width (cells)
             int slit_center = 100; // midpoint between the two slits (y, in cells)
             int slit_sep = 40;     // distance between the slit centers (your c1=80, c2=120)
-            };
          */
+
         QDoubleSpinBox   *kx_input_box = new QDoubleSpinBox(), *ky_input_box = new QDoubleSpinBox(),
                     *delta_x_input_box = new QDoubleSpinBox(), *delta_y_input_box = new QDoubleSpinBox(),
                     *sigma_x_input_box = new QDoubleSpinBox(), *sigma_y_input_box = new QDoubleSpinBox(),
@@ -82,10 +79,12 @@ MainWindow::MainWindow(QWidget *parent)
         slit_center_input_box -> setValue(p_default.slit_center);
         slit_sep_input_box -> setValue(p_default.slit_sep);
 
-        // int NMAX = 205, MMAX = 175;
-        x_zero_input_box -> setRange(0.0,170.0);
-        y_zero_input_box -> setRange(0.0,200.0);
-        slit_center_input_box -> setRange(0.0,200.0);
+        // NMAX = 205, MMAX = 175;
+        kx_input_box -> setRange(-20.0, 20.0);
+        ky_input_box -> setRange(-20.0, 20.0);
+        x_zero_input_box -> setRange(0.0, 170.0);
+        y_zero_input_box -> setRange(0.0, 200.0);
+        slit_center_input_box -> setRange(0.0, 200.0);
 
         auto    *kx_label = new QLabel("kx"), *ky_label = new QLabel("ky"),
                 *delta_x_label = new QLabel("delta x"), *delta_y_label = new QLabel("delta y"),
