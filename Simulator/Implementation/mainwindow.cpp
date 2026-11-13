@@ -58,14 +58,22 @@ MainWindow::MainWindow(QWidget *parent)
          */
 
         QDoubleSpinBox   *kx_input_box = new QDoubleSpinBox(), *ky_input_box = new QDoubleSpinBox(),
-                    *delta_x_input_box = new QDoubleSpinBox(), *delta_y_input_box = new QDoubleSpinBox(),
-                    *sigma_x_input_box = new QDoubleSpinBox(), *sigma_y_input_box = new QDoubleSpinBox(),
-                    *x_zero_input_box = new QDoubleSpinBox(), *y_zero_input_box = new QDoubleSpinBox(),
-                    *slit_w_input_box = new QDoubleSpinBox(),
-                    *slit_center_input_box = new QDoubleSpinBox(),
-                    *slit_sep_input_box = new QDoubleSpinBox();
+                        *delta_x_input_box = new QDoubleSpinBox(), *delta_y_input_box = new QDoubleSpinBox(),
+                        *sigma_x_input_box = new QDoubleSpinBox(), *sigma_y_input_box = new QDoubleSpinBox(),
+                        *x_zero_input_box = new QDoubleSpinBox(), *y_zero_input_box = new QDoubleSpinBox();
+
+        QSpinBox    *slit_w_input_box = new QSpinBox(),
+                    *slit_center_input_box = new QSpinBox(),
+                    *slit_sep_input_box = new QSpinBox();
 
         Params p_default;
+
+        // NMAX = 205, MMAX = 175;
+        kx_input_box -> setRange(-20.0, 20.0);
+        ky_input_box -> setRange(-20.0, 20.0);
+        x_zero_input_box -> setRange(0.0, 170.0);
+        y_zero_input_box -> setRange(0.0, 200.0);
+        slit_center_input_box -> setRange(0, 200);
 
         kx_input_box->setValue(p_default.kx);
         ky_input_box->setValue(p_default.ky);
@@ -78,13 +86,6 @@ MainWindow::MainWindow(QWidget *parent)
         slit_w_input_box -> setValue(p_default.slit_w);
         slit_center_input_box -> setValue(p_default.slit_center);
         slit_sep_input_box -> setValue(p_default.slit_sep);
-
-        // NMAX = 205, MMAX = 175;
-        kx_input_box -> setRange(-20.0, 20.0);
-        ky_input_box -> setRange(-20.0, 20.0);
-        x_zero_input_box -> setRange(0.0, 170.0);
-        y_zero_input_box -> setRange(0.0, 200.0);
-        slit_center_input_box -> setRange(0.0, 200.0);
 
         auto    *kx_label = new QLabel("kx"), *ky_label = new QLabel("ky"),
                 *delta_x_label = new QLabel("delta x"), *delta_y_label = new QLabel("delta y"),
